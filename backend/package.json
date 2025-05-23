@@ -1,7 +1,7 @@
 {
   "name": "ghana-education-platform",
   "version": "1.0.0",
-  "description": "21st Century Teacher Educator App for Ghana",
+  "description": "21st Century Teacher Educator App for Ghana with AI Integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -21,10 +21,10 @@
     "dotenv": "^16.4.5",
     "express-rate-limit": "^7.2.0",
     "express-validator": "^7.0.1",
-    "winston": "^3.13.0", 
-    "cohere-ai": "^7.0.0",
-    "together-ai": "^0.5.0", 
-    "@huggingface/inference": "^2.6.0"
+    "winston": "^3.13.0",
+    "cohere-ai": "^7.17.1",
+    "together-ai": "^0.5.2",
+    "@huggingface/inference": "^2.8.1"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -35,7 +35,10 @@
     "education",
     "teacher-training",
     "ai",
-    "chatbot"
+    "chatbot",
+    "cohere",
+    "together-ai",
+    "huggingface"
   ],
   "author": "Ghana Education Platform",
   "license": "MIT"
