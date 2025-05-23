@@ -1,4 +1,4 @@
-// server.js - Complete Ghana Education Platform with Student Tracking
+// server.js - Complete Ghana Education Platform with Multi-AI Integration
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,8 +9,24 @@ const jwt = require('jsonwebtoken');
 const winston = require('winston');
 require('dotenv').config();
 
+// AI Integration imports
+const { CohereClient } = require('cohere-ai');
+const Together = require('together-ai');
+const { HfInference } = require('@huggingface/inference');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize AI clients
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY,
+});
+
+const together = new Together({
+  apiKey: process.env.TOGETHER_API_KEY,
+});
+
+const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
 
 // Logger setup
 const logger = winston.createLogger({
@@ -375,16 +391,222 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
+// AI Service Class
+class GhanaEducationAI {
+  constructor() {
+    this.providers = [
+      { name: 'cohere', client: cohere, available: !!process.env.COHERE_API_KEY },
+      { name: 'together', client: together, available: !!process.env.TOGETHER_API_KEY },
+      { name: 'huggingface', client: hf, available: !!process.env.HUGGINGFACE_TOKEN }
+    ];
+    
+    this.activeProviders = this.providers.filter(p => p.available);
+    logger.info(`🤖 AI Providers initialized: ${this.activeProviders.map(p => p.name).join(', ')}`);
+  }
+
+  async generateResponse(message, context = {}, knowledgeBase = []) {
+    const prompt = this.buildGhanaEducationPrompt(message, context, knowledgeBase);
+    
+    // Try each provider in order
+    for (const provider of this.activeProviders) {
+      try {
+        logger.info(`🔄 Trying ${provider.name} for AI response`);
+        const response = await this.callProvider(provider, prompt, message);
+        
+        if (response) {
+          logger.info(`✅ Successfully got response from ${provider.name}`);
+          return {
+            response,
+            provider: provider.name,
+            success: true
+          };
+        }
+      } catch (error) {
+        logger.warn(`⚠️ ${provider.name} failed:`, error.message);
+        continue;
+      }
+    }
+
+    // Fallback response if all AI providers fail
+    return {
+      response: this.getFallbackResponse(message, context),
+      provider: 'fallback',
+      success: false
+    };
+  }
+
+  async callProvider(provider, prompt, originalMessage) {
+    switch (provider.name) {
+      case 'cohere':
+        return await this.callCohere(prompt, originalMessage);
+      case 'together':
+        return await this.callTogether(prompt, originalMessage);
+      case 'huggingface':
+        return await this.callHuggingFace(prompt);
+      default:
+        throw new Error('Unknown provider');
+    }
+  }
+
+  async callCohere(prompt, originalMessage) {
+    const response = await cohere.chat({
+      model: 'command-r-plus',
+      message: originalMessage,
+      preamble: prompt,
+      max_tokens: 1000,
+      temperature: 0.7,
+      connectors: []
+    });
+
+    return response.text;
+  }
+
+  async callTogether(prompt, originalMessage) {
+    const response = await together.chat.completions.create({
+      messages: [
+        { role: 'system', content: prompt },
+        { role: 'user', content: originalMessage }
+      ],
+      model: 'meta-llama/Llama-2-70b-chat-hf',
+      max_tokens: 1000,
+      temperature: 0.7,
+      top_p: 0.9
+    });
+
+    return response.choices[0]?.message?.content;
+  }
+
+  async callHuggingFace(prompt) {
+    const response = await hf.textGeneration({
+      model: 'microsoft/DialoGPT-large',
+      inputs: prompt,
+      parameters: {
+        max_length: 1000,
+        temperature: 0.7,
+        do_sample: true,
+        top_p: 0.9
+      }
+    });
+
+    return response.generated_text;
+  }
+
+  buildGhanaEducationPrompt(message, context, knowledgeBase) {
+    const { user, chatbot, conversationContext } = context;
+    
+    let prompt = `You are a specialized AI assistant for Ghana's Teacher Education system. You are helping B.Ed students and teachers across Ghana's 47 Colleges of Education.
+
+CONTEXT:
+- Student: ${user?.first_name} ${user?.last_name}
+- College: ${user?.college_name || 'Ghana College of Education'}
+- Program: ${user?.program_type || 'B.Ed Program'}
+- Year: ${user?.current_year || 'Current Student'}
+- Chatbot: ${chatbot?.name || 'Ghana Education Assistant'}
+
+GHANA EDUCATION SPECIFICS:
+- Focus on Ghana's B.Ed curriculum
+- Reference Ghana's educational policies and practices
+- Use examples relevant to Ghanaian schools
+- Include local context and cultural considerations
+- Support both English and local language teaching methods
+
+CONVERSATION CONTEXT:
+${conversationContext ? JSON.stringify(conversationContext, null, 2) : 'New conversation'}
+
+RELEVANT CURRICULUM CONTENT:
+${knowledgeBase.length > 0 ? knowledgeBase.map(kb => `- ${kb.course_name}: ${kb.content.substring(0, 300)}...`).join('\n') : 'No specific curriculum materials available'}
+
+GUIDELINES:
+1. Be helpful, encouraging, and educational
+2. Provide practical advice for Ghanaian classrooms
+3. Reference specific B.Ed courses when relevant
+4. Include examples from Ghana's educational context
+5. Be culturally sensitive and appropriate
+6. Use clear, simple English accessible to all students
+
+USER MESSAGE: ${message}
+
+Provide a helpful, contextual response:`;
+
+    return prompt;
+  }
+
+  getFallbackResponse(message, context) {
+    const responses = [
+      `Hello! I'm here to help with your B.Ed studies in Ghana. 🇬🇭 While I'm experiencing some technical issues, I can still provide basic guidance. What specific topic would you like to discuss?`,
+      
+      `Thank you for your question about "${message}". I'm currently having connectivity issues with my AI services, but I can help you with general B.Ed curriculum questions. Please be more specific about what you need help with.`,
+      
+      `I understand you're asking about your studies. Even though my AI systems are temporarily unavailable, I can guide you to:
+      
+1. **Course Materials**: Check your uploaded curriculum documents
+2. **Study Groups**: Connect with classmates in your program
+3. **Practice Questions**: Review past examination papers
+4. **STS Support**: Consult your mentor teacher
+
+What specific area would you like guidance on?`
+    ];
+
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // RAG (Retrieval Augmented Generation) function
+  async getRelevantKnowledge(chatbotId, userMessage, limit = 3) {
+    try {
+      // Simple keyword-based retrieval (can be enhanced with vector search)
+      const keywords = userMessage.toLowerCase().split(' ').filter(word => word.length > 3);
+      const keywordQuery = keywords.map(word => `content ILIKE '%${word}%'`).join(' OR ');
+      
+      if (!keywordQuery) return [];
+
+      const result = await pool.query(
+        `SELECT * FROM knowledge_base 
+         WHERE chatbot_id = $1 AND (${keywordQuery})
+         ORDER BY id DESC LIMIT $2`,
+        [chatbotId, limit]
+      );
+
+      return result.rows;
+    } catch (error) {
+      logger.error('Knowledge retrieval error:', error);
+      return [];
+    }
+  }
+}
+
+// Initialize AI service
+const ghanaAI = new GhanaEducationAI();
+
+// Get courses based on curriculum
+function getCourses(year, semester, program) {
+  try {
+    const yearCourses = CURRICULUM_STRUCTURE.courses[year];
+    if (!yearCourses) return ['General Education Courses'];
+    
+    const semesterCourses = yearCourses[semester];
+    if (!semesterCourses) return ['General Education Courses'];
+    
+    if (typeof semesterCourses === 'object' && !Array.isArray(semesterCourses)) {
+      return semesterCourses[program] || semesterCourses['common'] || ['General Education Courses'];
+    }
+    
+    return semesterCourses;
+  } catch (error) {
+    return ['General Education Courses'];
+  }
+}
+
 // ROUTES
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
-    status: '🇬🇭 Ghana Education Platform with Student Tracking is healthy!',
+    status: '🇬🇭 Ghana Education Platform with Multi-AI Integration is healthy!',
     timestamp: new Date().toISOString(),
     colleges: GHANA_COLLEGES.length,
-    features: ['Student tracking', 'Curriculum-based chatbots', 'RAG support', 'Teacher analytics']
+    features: ['Multi-AI support', 'Student tracking', 'Curriculum-based chatbots', 'RAG support', 'Teacher analytics'],
+    ai_providers: ghanaAI.activeProviders.length
   });
 });
 
@@ -453,7 +675,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: '🇬🇭 Welcome to Ghana Education Platform!',
+      message: '🇬🇭 Welcome to Ghana Education Platform with AI!',
       user: {
         id: user.id,
         email: user.email,
@@ -508,7 +730,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     res.json({
       success: true,
-      message: '🇬🇭 Welcome back to your learning journey!',
+      message: '🇬🇭 Welcome back to your AI-powered learning journey!',
       user: {
         id: user.id,
         email: user.email,
@@ -712,7 +934,7 @@ app.get('/api/teacher/students', authenticateToken, async (req, res) => {
   }
 });
 
-// Enhanced chat with enrollment tracking
+// Enhanced chat with AI integration
 app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
   try {
     const chatbotId = req.params.id;
@@ -722,7 +944,7 @@ app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Message is required' });
     }
 
-    // Check if student is enrolled (for non-default chatbots)
+    // Check enrollment (existing code)
     if (req.user.role === 'student') {
       const enrollmentCheck = await pool.query(
         `SELECT ce.*, c.is_default FROM chatbot_enrollments ce 
@@ -737,7 +959,7 @@ app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
         return res.status(403).json({ success: false, error: 'You must enroll in this chatbot first' });
       }
 
-      // Update last active time and message count
+      // Update engagement tracking
       await pool.query(
         `UPDATE chatbot_enrollments 
          SET last_active = CURRENT_TIMESTAMP, total_messages = total_messages + 1
@@ -746,7 +968,7 @@ app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
       );
     }
 
-    // Get chatbot
+    // Get chatbot details
     const chatbotResult = await pool.query(
       `SELECT c.*, u.first_name, u.last_name 
        FROM chatbots c 
@@ -792,35 +1014,30 @@ app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
       [conversation.id, 'user', message]
     );
 
-    // Generate intelligent response based on curriculum context
-    const conversationContext = conversation.conversation_context || {};
-    const responseData = generateContextualResponse(message, conversationContext, chatbot, req.user);
+    // Get relevant knowledge base content using RAG
+    const relevantKnowledge = await ghanaAI.getRelevantKnowledge(chatbotId, message);
+    
+    // Generate AI response using multi-provider system
+    const aiResult = await ghanaAI.generateResponse(message, {
+      user: req.user,
+      chatbot,
+      conversationContext: conversation.conversation_context
+    }, relevantKnowledge);
 
-    // Update conversation context
-    if (responseData.context) {
-      await pool.query(
-        'UPDATE conversations SET conversation_context = $1, current_step = $2, last_message_at = CURRENT_TIMESTAMP WHERE id = $3',
-        [JSON.stringify(responseData.context), responseData.next_step, conversation.id]
-      );
+    let finalResponse = aiResult.response;
+
+    // Add curriculum context if available
+    if (relevantKnowledge.length > 0) {
+      finalResponse += `\n\n📚 **Related Curriculum Content:**\n`;
+      relevantKnowledge.forEach(kb => {
+        finalResponse += `• **${kb.course_name}**: ${kb.content.substring(0, 150)}...\n`;
+      });
     }
 
-    // Get relevant knowledge base content
-    let contextualInfo = '';
-    if (conversationContext.courses && conversationContext.semester) {
-      const knowledgeResult = await pool.query(
-        'SELECT content FROM knowledge_base WHERE chatbot_id = $1 ORDER BY id LIMIT 3',
-        [chatbotId]
-      );
-      
-      if (knowledgeResult.rows.length > 0) {
-        contextualInfo = '\n\nAdditional Context from Course Materials:\n' + 
-          knowledgeResult.rows.map(row => row.content.substring(0, 200) + '...').join('\n');
-      }
-    }
+    // Add Ghana-specific footer
+    finalResponse += `\n\n🇬🇭 *Powered by Ghana Education Platform - Supporting ${GHANA_COLLEGES.length} Colleges of Education*`;
 
-    const finalResponse = responseData.response + contextualInfo;
-
-    // Save assistant response
+    // Save AI response with metadata
     await pool.query(
       'INSERT INTO messages (conversation_id, role, content, metadata) VALUES ($1, $2, $3, $4)',
       [
@@ -828,208 +1045,49 @@ app.post('/api/chatbots/:id/chat', authenticateToken, async (req, res) => {
         'assistant', 
         finalResponse,
         JSON.stringify({ 
-          step: responseData.next_step,
-          context: responseData.context 
+          ai_provider: aiResult.provider,
+          success: aiResult.success,
+          knowledge_items_used: relevantKnowledge.length
         })
       ]
+    );
+
+    // Update conversation context
+    await pool.query(
+      'UPDATE conversations SET last_message_at = CURRENT_TIMESTAMP WHERE id = $1',
+      [conversation.id]
     );
 
     // Log analytics
     await pool.query(
       'INSERT INTO usage_analytics (user_id, chatbot_id, action, metadata) VALUES ($1, $2, $3, $4)',
-      [req.user.id, chatbotId, 'message_sent', JSON.stringify({ message_length: message.length })]
+      [req.user.id, chatbotId, 'ai_message_sent', JSON.stringify({ 
+        ai_provider: aiResult.provider,
+        message_length: message.length,
+        knowledge_items: relevantKnowledge.length
+      })]
     );
 
     res.json({
       success: true,
       response: finalResponse,
       conversationId: conversation.id,
-      currentStep: responseData.next_step,
-      context: responseData.context
+      metadata: {
+        ai_provider: aiResult.provider,
+        knowledge_items_used: relevantKnowledge.length,
+        response_successful: aiResult.success
+      }
     });
 
   } catch (error) {
-    logger.error('Chat error:', error);
-    res.status(500).json({ success: false, error: 'Chat failed' });
+    logger.error('Enhanced chat error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Chat failed',
+      fallback_response: "I'm experiencing technical difficulties. Please try again or contact your teacher for assistance."
+    });
   }
 });
-
-// Intelligent conversation handler
-function generateContextualResponse(userMessage, conversationContext, chatbot, user) {
-  const context = conversationContext || {};
-  const step = context.current_step || 'greeting';
-  
-  switch (step) {
-    case 'greeting':
-      return {
-        response: `Hello ${user.first_name}! Welcome to ${chatbot.name} for Ghana! 🇬🇭
-
-I'm here to help you with your B.Ed program. To provide you with the most relevant support, let me ask you a few questions.
-
-**Which college are you from?** (Please type the number)
-
-${GHANA_COLLEGES.map((college, index) => `${index + 1}. ${college}`).slice(0, 10).join('\n')}
-
-${GHANA_COLLEGES.length > 10 ? `... and ${GHANA_COLLEGES.length - 10} more colleges` : ''}
-
-Type the number of your college:`,
-        next_step: 'college_selection',
-        context: { ...context, current_step: 'college_selection' }
-      };
-
-    case 'college_selection':
-      const collegeIndex = parseInt(userMessage) - 1;
-      if (collegeIndex >= 0 && collegeIndex < GHANA_COLLEGES.length) {
-        return {
-          response: `Great! You're from ${GHANA_COLLEGES[collegeIndex]}. 
-
-**Which year are you in?** (Type the number)
-1. Year 1
-2. Year 2  
-3. Year 3
-4. Year 4`,
-          next_step: 'year_selection',
-          context: { 
-            ...context, 
-            current_step: 'year_selection',
-            college: GHANA_COLLEGES[collegeIndex] 
-          }
-        };
-      } else {
-        return {
-          response: 'Please enter a valid college number (1-47).',
-          next_step: 'college_selection',
-          context
-        };
-      }
-
-    case 'year_selection':
-      const year = ['Year 1', 'Year 2', 'Year 3', 'Year 4'][parseInt(userMessage) - 1];
-      if (year) {
-        return {
-          response: `You're in ${year}. 
-
-**Which program are you in?** (Type the number)
-1. Early Grade (Kindergarten - Primary 3)
-2. Upper Grade (Primary 4 - Primary 6)
-3. JHS Specialism`,
-          next_step: 'program_selection',
-          context: { 
-            ...context, 
-            current_step: 'program_selection',
-            year 
-          }
-        };
-      } else {
-        return {
-          response: 'Please enter a valid year (1-4).',
-          next_step: 'year_selection',
-          context
-        };
-      }
-
-    case 'program_selection':
-      const programs = ['early_grade', 'upper_grade', 'jhs'];
-      const programNames = ['Early Grade', 'Upper Grade', 'JHS Specialism'];
-      const programIndex = parseInt(userMessage) - 1;
-      
-      if (programIndex >= 0 && programIndex < 3) {
-        return {
-          response: `Perfect! You're in ${programNames[programIndex]}.
-
-**Which semester are you in?** (Type the number)
-1. Semester 1
-2. Semester 2`,
-          next_step: 'semester_selection',
-          context: { 
-            ...context, 
-            current_step: 'semester_selection',
-            program: programs[programIndex],
-            program_name: programNames[programIndex]
-          }
-        };
-      } else {
-        return {
-          response: 'Please enter a valid program (1-3).',
-          next_step: 'program_selection',
-          context
-        };
-      }
-
-    case 'semester_selection':
-      const semester = ['Semester 1', 'Semester 2'][parseInt(userMessage) - 1];
-      if (semester) {
-        const courses = getCourses(context.year, semester, context.program);
-        return {
-          response: `Great! Based on your profile:
-- College: ${context.college}
-- Year: ${context.year}
-- Program: ${context.program_name}  
-- Semester: ${semester}
-
-**Your courses for this semester are:**
-${courses.map((course, index) => `${index + 1}. ${course}`).join('\n')}
-
-Are these correct, or do you have additional courses?
-
-**What would you like help with today?** (Type the number)
-1. Lecture Notes
-2. Practice Questions
-3. Assessment Preparation  
-4. STS Support
-5. Action Research Help`,
-          next_step: 'service_selection',
-          context: { 
-            ...context, 
-            current_step: 'service_selection',
-            semester,
-            courses
-          }
-        };
-      } else {
-        return {
-          response: 'Please enter a valid semester (1-2).',
-          next_step: 'semester_selection',
-          context
-        };
-      }
-
-    default:
-      return {
-        response: `I understand you said: "${userMessage}"
-
-Based on your B.Ed program context, I'm here to help with:
-1. Lecture Notes
-2. Practice Questions  
-3. Assessment Preparation
-4. STS Support
-5. Action Research Help
-
-What would you like help with? (Type 1-5)`,
-        next_step: 'service_selection',
-        context
-      };
-  }
-}
-
-// Get courses based on curriculum
-function getCourses(year, semester, program) {
-  try {
-    const yearCourses = CURRICULUM_STRUCTURE.courses[year];
-    if (!yearCourses) return ['General Education Courses'];
-    
-    const semesterCourses = yearCourses[semester];
-    if (!semesterCourses) return ['General Education Courses'];
-    
-    if (typeof semesterCourses === 'object' && !Array.isArray(semesterCourses)) {
-      return semesterCourses[program] || semesterCourses['common'] || ['General Education Courses'];
-    }
-    
-    return semesterCourses;
-  } catch (error) {
-    return ['General Education Courses'];
-  }
-}
 
 // Create/customize chatbot (teachers only)
 app.post('/api/chatbots', authenticateToken, async (req, res) => {
@@ -1063,7 +1121,7 @@ app.post('/api/chatbots', authenticateToken, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: '🎓 Curriculum-based chatbot created successfully!',
+      message: '🎓 AI-powered chatbot created successfully!',
       chatbot,
       accessCode: finalAccessCode
     });
@@ -1134,7 +1192,7 @@ app.post('/api/chatbots/:id/upload', authenticateToken, upload.array('files', 10
 
     res.json({
       success: true,
-      message: '📚 Curriculum materials uploaded and processed successfully!',
+      message: '📚 Curriculum materials uploaded and processed for AI!',
       processedFiles
     });
 
@@ -1191,6 +1249,45 @@ function chunkText(text, chunkSize = 1000) {
   
   return chunks;
 }
+
+// Add AI status endpoint
+app.get('/api/ai/status', authenticateToken, async (req, res) => {
+  try {
+    const status = {
+      providers: ghanaAI.activeProviders.map(p => ({
+        name: p.name,
+        available: p.available,
+        status: 'unknown'
+      })),
+      total_active: ghanaAI.activeProviders.length,
+      fallback_enabled: true
+    };
+
+    // Test each provider quickly
+    for (let i = 0; i < status.providers.length; i++) {
+      try {
+        const testResult = await ghanaAI.callProvider(
+          ghanaAI.activeProviders[i], 
+          'Test prompt for Ghana Education Platform', 
+          'Hello'
+        );
+        status.providers[i].status = testResult ? 'healthy' : 'error';
+      } catch (error) {
+        status.providers[i].status = 'error';
+        status.providers[i].error = error.message;
+      }
+    }
+
+    res.json({
+      success: true,
+      ai_status: status
+    });
+
+  } catch (error) {
+    logger.error('AI status error:', error);
+    res.status(500).json({ success: false, error: 'Failed to check AI status' });
+  }
+});
 
 // Get detailed teacher analytics with student info
 app.get('/api/teacher/analytics', authenticateToken, async (req, res) => {
@@ -1412,9 +1509,10 @@ async function startServer() {
     await initializeDatabase();
     
     app.listen(PORT, () => {
-      logger.info(`🇬🇭 Ghana Education Platform with Student Tracking running on port ${PORT}`);
-      logger.info(`📚 Ready to serve ${GHANA_COLLEGES.length} colleges with full student management!`);
-      logger.info(`🎓 Features: Student enrollment tracking, Teacher analytics, Curriculum support`);
+      logger.info(`🇬🇭 Ghana Education Platform with Multi-AI Integration running on port ${PORT}`);
+      logger.info(`📚 Ready to serve ${GHANA_COLLEGES.length} colleges with AI-powered education!`);
+      logger.info(`🤖 AI Providers: ${ghanaAI.activeProviders.length} active`);
+      logger.info(`🎓 Features: Multi-AI, Student tracking, RAG, Teacher analytics`);
       logger.info(`🚀 Visit: ${process.env.RAILWAY_STATIC_URL || `http://localhost:${PORT}`}/api/health`);
     });
     
