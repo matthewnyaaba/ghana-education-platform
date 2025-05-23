@@ -21,7 +21,10 @@
     "dotenv": "^16.4.5",
     "express-rate-limit": "^7.2.0",
     "express-validator": "^7.0.1",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0", 
+    "cohere-ai": "^7.0.0",
+    "together-ai": "^0.5.0", 
+    "@huggingface/inference": "^2.6.0"
   },
   "engines": {
     "node": ">=18.0.0",
