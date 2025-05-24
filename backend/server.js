@@ -114,7 +114,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:3001', 
-    'https://charming-churros-c86d3e.netlify.app', // Your Netlify frontend
+    'https://charming-churros-c86d3e.netlify.app',
+    'https://6831ef5d4cb23a3dd5f8ca3e--charming-churros-c86d3e.netlify.app', // NEW URL
     process.env.FRONTEND_URL
   ],
   credentials: true,
