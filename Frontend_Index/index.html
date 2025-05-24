@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghana Education Platform 🇬🇭</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        .flag {
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 102, 204, 0.1);
+            color: #0066cc;
+            border: 2px solid #0066cc;
+        }
+
+        .btn-secondary:hover {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .welcome-section {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #0066cc;
+            margin-bottom: 1rem;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .chatbot-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .chatbot-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .chat-interface {
+            background: white;
+            border-radius: 15px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header {
+            background: #0066cc;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            max-width: 80%;
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .message-content {
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #0066cc;
+            color: white;
+        }
+
+        .message.ai .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #0066cc;
+        }
+
+        .send-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            background: #0052a3;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .college-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .college-item {
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .college-item:hover, .college-item.selected {
+            border-color: #0066cc;
+            background: rgba(0, 102, 204, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-interface {
+                height: 500px;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // API Configuration
+        const API_BASE = 'https://ghana-education-platform-production.up.railway.app/api';
+        // Ghana Colleges Data
+        const GHANA_COLLEGES = [
+            'Accra College of Education', 'Ada College of Education', 'Agogo Presbyterian College of Education',
+            'Ahafoman College of Education', 'Akatsi College of Education', 'Akrokerri College of Education',
+            'Bagabaga College of Education', 'Berekum College of Education', 'Dambai College of Education',
+            'Enchi College of Education', 'Fosu College of Education', 'Gbewaa College of Education',
+            'Holy Child College of Education', 'Jasikan College of Education', 'Kibi Presbyterian College of Education',
+            'Komenda College of Education', 'Kpando College of Education', 'Mampong Technical College of Education',
+            'Mt. Mary College of Education', 'Nusrat Jahan Ahmadiyya College of Education',
+            'Offinso College of Education', 'OLA College of Education', 'Ola College of Education, Cape Coast',
+            'Peki College of Education', 'Presbyterian College of Education, Abetifi',
+            'Presbyterian College of Education, Akropong', 'SDA College of Education', 'Serwi-Aheman College of Education',
+            'St. Francis College of Education', 'St. Joseph College of Education', 'St. Louis College of Education',
+            'St. Monica College of Education', 'St. Vincent College of Education', 'Tamale College of Education',
+            'Tumu College of Education', 'University of Cape Coast College of Education',
+            'Wesley College of Education', 'Wiawso College of Education', 'Winneba College of Education',
+            'Berekum College of Education', 'Foso College of Education', 'Gambaga College of Education',
+            'Kinessis College of Education', 'Mawuko Girls College of Education', 'McCoy College of Education',
+            'Pope John Senior High School and Minor Seminary', 'Pwani College of Education'
+        ];
+
+        // API Service
+        class ApiService {
+            static async request(endpoint, options = {}) {
+                const token = localStorage.getItem('token');
+                
+                const config = {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { Authorization: `Bearer ${token}` }),
+                        ...options.headers,
+                    },
+                };
+
+                const response = await fetch(`${API_BASE}${endpoint}`, config);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                return data;
+            }
+
+            static async register(userData) {
+                return this.request('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify(userData),
+                });
+            }
+
+            static async login(credentials) {
+                return this.request('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify(credentials),
+                });
+            }
+
+            static async getChatbots() {
+                return this.request('/chatbots');
+            }
+
+            static async chat(chatbotId, message) {
+                return this.request(`/chatbots/${chatbotId}/chat`, {
+                    method: 'POST',
+                    body: JSON.stringify({ message }),
+                });
+            }
+
+            static async createChatbot(chatbotData) {
+                return this.request('/chatbots', {
+                    method: 'POST',
+                    body: JSON.stringify(chatbotData),
+                });
+            }
+
+            static async getHealth() {
+                return this.request('/health');
+            }
+        }
+
+        // Header Component
+        function Header({ user, onLogout, currentView, onViewChange }) {
+            return (
+                <header className="header">
+                    <div className="header-content">
+                        <div className="logo">
+                            <span className="flag">🇬🇭</span>
+                            <span>Ghana Education Platform</span>
+                        </div>
+                        <div className="nav-buttons">
+                            {user ? (
+                                <>
+                                    <span style={{ color: '#0066cc', fontWeight: '600' }}>
+                                        Welcome, {user.firstName}!
+                                    </span>
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => onViewChange('dashboard')}
+                                    >
+                                        <i className="fas fa-home"></i> Dashboard
+                                    </button>
+                                    {user.role === 'teacher' && (
+                                        <button 
+                                            className="btn btn-secondary"
+                                            onClick={() => onViewChange('create-chatbot')}
+                                        >
+                                            <i className="fas fa-plus"></i> Create AI Tutor
+                                        </button>
+                                    )}
+                                    <button 
+                                        className="btn btn-danger"
+                                        onClick={onLogout}
+                                    >
+                                        <i className="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => onViewChange('login')}
+                                    >
+                                        <i className="fas fa-sign-in-alt"></i> Login
+                                    </button>
+                                    <button 
+                                        className="btn btn-primary"
+                                        onClick={() => onViewChange('register')}
+                                    >
+                                        <i className="fas fa-user-plus"></i> Register
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </header>
+            );
+        }
+
+        // Login Component
+        function Login({ onLogin, onViewChange }) {
+            const [formData, setFormData] = useState({ email: '', password: '' });
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+
+                try {
+                    const response = await ApiService.login(formData);
+                    localStorage.setItem('token', response.token);
+                    onLogin(response.user);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="form-container">
+                    <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#0066cc' }}>
+                        <i className="fas fa-sign-in-alt"></i> Login to Platform
+                    </h2>
+                    
+                    {error && <div className="alert alert-error">{error}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">Email Address</label>
+                            <input
+                                type="email"
+                                className="form-input"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                required
+                                placeholder="your.email@example.com"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Password</label>
+                            <input
+                                type="password"
+                                className="form-input"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                required
+                                placeholder="Enter your password"
+                            />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginBottom: '1rem' }}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <div className="loading">
+                                    <div className="spinner"></div>
+                                    Logging in...
+                                </div>
+                            ) : (
+                                <>
+                                    <i className="fas fa-sign-in-alt"></i> Login
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        Don't have an account?{' '}
+                        <button 
+                            className="btn btn-secondary"
+                            onClick={() => onViewChange('register')}
+                            style={{ padding: '0.3rem 0.8rem' }}
+                        >
+                            Register Here
+                        </button>
+                    </p>
+                </div>
+            );
+        }
+
+        // Register Component
+        function Register({ onRegister, onViewChange }) {
+            const [formData, setFormData] = useState({
+                email: '',
+                password: '',
+                confirmPassword: '',
+                firstName: '',
+                lastName: '',
+                role: 'student',
+                collegeName: '',
+                programType: 'B.Ed Primary',
+                currentYear: 'Year 1'
+            });
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [showColleges, setShowColleges] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                
+                if (formData.password !== formData.confirmPassword) {
+                    setError('Passwords do not match');
+                    return;
+                }
+
+                if (formData.password.length < 6) {
+                    setError('Password must be at least 6 characters');
+                    return;
+                }
+
+                setLoading(true);
+                setError('');
+
+                try {
+                    const { confirmPassword, ...dataToSend } = formData;
+                    const response = await ApiService.register(dataToSend);
+                    localStorage.setItem('token', response.token);
+                    onRegister(response.user);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="form-container">
+                    <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#0066cc' }}>
+                        <i className="fas fa-user-plus"></i> Join Ghana Education Platform
+                    </h2>
+                    
+                    {error && <div className="alert alert-error">{error}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">First Name</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.firstName}
+                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                required
+                                placeholder="Your first name"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Last Name</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.lastName}
+                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                required
+                                placeholder="Your last name"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Email Address</label>
+                            <input
+                                type="email"
+                                className="form-input"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                required
+                                placeholder="your.email@example.com"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Password</label>
+                            <input
+                                type="password"
+                                className="form-input"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                required
+                                placeholder="At least 6 characters"
+                                minLength="6"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Confirm Password</label>
+                            <input
+                                type="password"
+                                className="form-input"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                required
+                                placeholder="Confirm your password"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Role</label>
+                            <select
+                                className="form-select"
+                                value={formData.role}
+                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                required
+                            >
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher/Lecturer</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">College</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.collegeName}
+                                onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
+                                placeholder="Search or select your college"
+                                onFocus={() => setShowColleges(true)}
+                            />
+                            {showColleges && (
+                                <div className="college-grid" style={{ maxHeight: '200px' }}>
+                                    {GHANA_COLLEGES.filter(college => 
+                                        college.toLowerCase().includes(formData.collegeName.toLowerCase())
+                                    ).map(college => (
+                                        <div
+                                            key={college}
+                                            className="college-item"
+                                            onClick={() => {
+                                                setFormData({ ...formData, collegeName: college });
+                                                setShowColleges(false);
+                                            }}
+                                        >
+                                            {college}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {formData.role === 'student' && (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">Program Type</label>
+                                    <select
+                                        className="form-select"
+                                        value={formData.programType}
+                                        onChange={(e) => setFormData({ ...formData, programType: e.target.value })}
+                                    >
+                                        <option value="B.Ed Primary">B.Ed Primary Education</option>
+                                        <option value="B.Ed JHS">B.Ed Junior High School</option>
+                                        <option value="B.Ed ECE">B.Ed Early Childhood Education</option>
+                                        <option value="B.Ed Special">B.Ed Special Education</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Current Year</label>
+                                    <select
+                                        className="form-select"
+                                        value={formData.currentYear}
+                                        onChange={(e) => setFormData({ ...formData, currentYear: e.target.value })}
+                                    >
+                                        <option value="Year 1">Year 1</option>
+                                        <option value="Year 2">Year 2</option>
+                                        <option value="Year 3">Year 3</option>
+                                        <option value="Year 4">Year 4</option>
+                                    </select>
+                                </div>
+                            </>
+                        )}
+
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginBottom: '1rem' }}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <div className="loading">
+                                    <div className="spinner"></div>
+                                    Creating Account...
+                                </div>
+                            ) : (
+                                <>
+                                    <i className="fas fa-user-plus"></i> Create Account
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        Already have an account?{' '}
+                        <button 
+                            className="btn btn-secondary"
+                            onClick={() => onViewChange('login')}
+                            style={{ padding: '0.3rem 0.8rem' }}
+                        >
+                            Login Here
+                        </button>
+                    </p>
+                </div>
+            );
+        }
+
+        // Dashboard Component
+        function Dashboard({ user, onViewChange }) {
+            const [chatbots, setChatbots] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [selectedChatbot, setSelectedChatbot] = useState(null);
+
+            useEffect(() => {
+                loadChatbots();
+            }, []);
+
+            const loadChatbots = async () => {
+                try {
+                    const response = await ApiService.getChatbots();
+                    setChatbots(response.chatbots);
+                } catch (error) {
+                    console.error('Failed to load chatbots:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            if (loading) {
+                return (
+                    <div style={{ textAlign: 'center', color: 'white', marginTop: '3rem' }}>
+                        <div className="loading">
+                            <div className="spinner"></div>
+                            Loading your AI tutors...
+                        </div>
+                    </div>
+                );
+            }
+
+            if (selectedChatbot) {
+                return (
+                    <ChatInterface 
+                        chatbot={selectedChatbot} 
+                        user={user}
+                        onBack={() => setSelectedChatbot(null)}
+                    />
+                );
+            }
+
+            return (
+                <div>
+                    <div className="welcome-section">
+                        <h1 className="welcome-title">
+                            Welcome to Your AI Learning Hub, {user.firstName}! 🇬🇭
+                        </h1>
+                        <p className="welcome-subtitle">
+                            {user.role === 'teacher' ? 
+                                `Create and manage AI tutors for your students at ${user.collegeName}` :
+                                `Access AI-powered tutors for your ${user.programType} program`
+                            }
+                        </p>
+                    </div>
+
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-number">{chatbots.length}</div>
+                            <div className="stat-label">Available AI Tutors</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-number">47</div>
+                            <div className="stat-label">Ghana Colleges Supported</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-number">24/7</div>
+                            <div className="stat-label">AI Support Available</div>
+                        </div>
+                    </div>
+
+                    <div className="dashboard-container">
+                        {chatbots.map(chatbot => (
+                            <div key={chatbot.id} className="chatbot-card">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div style={{ fontSize: '2rem' }}>
+                                        {chatbot.is_default ? '🇬🇭' : '🤖'}
+                                    </div>
+                                    <div>
+                                        <h3 style={{ color: '#0066cc', marginBottom: '0.5rem' }}>
+                                            {chatbot.name}
+                                        </h3>
+                                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                                            {chatbot.description || 'AI-powered educational assistant'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: '#666' }}>
+                                        <span><i className="fas fa-book"></i> {chatbot.subject || 'General'}</span>
+                                        <span><i className="fas fa-database"></i> {chatbot.knowledge_items || 0} resources</span>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setSelectedChatbot(chatbot)}
+                                        style={{ flex: 1 }}
+                                    >
+                                        <i className="fas fa-comments"></i> Start Chat
+                                    </button>
+                                    
+                                    {chatbot.can_edit && (
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => onViewChange('edit-chatbot', chatbot)}
+                                        >
+                                            <i className="fas fa-edit"></i> Edit
+                                        </button>
+                                    )}
+                                </div>
+
+                                {chatbot.is_default && (
+                                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: 'rgba(0, 102, 204, 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: '#0066cc' }}>
+                                        <i className="fas fa-star"></i> Official Ghana Education Assistant
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        {chatbots.length === 0 && (
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '15px', color: 'white' }}>
+                                <i className="fas fa-robot" style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}></i>
+                                <h3>No AI Tutors Available</h3>
+                                <p>Contact your lecturer to set up AI tutors for your course.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Chat Interface Component
+        function ChatInterface({ chatbot, user, onBack }) {
+            const [messages, setMessages] = useState([]);
+            const [inputValue, setInputValue] = useState('');
+            const [loading, setLoading] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            useEffect(() => {
+                // Initial welcome message
+                setMessages([
+                    {
+                        id: 1,
+                        role: 'ai',
+                        content: `Hello ${user.firstName}! 👋🏾 Welcome to your AI tutor for ${chatbot.subject || 'General Education'}. I'm here to help you with your B.Ed studies at ${user.collegeName}.\n\nHow can I assist you today? You can ask me about:\n📚 Course materials\n❓ Practice questions\n📝 Assignment help\n🏫 Teaching strategies\n🔬 Research guidance`,
+                        timestamp: new Date()
+                    }
+                ]);
+            }, [chatbot, user]);
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            const sendMessage = async () => {
+                if (!inputValue.trim() || loading) return;
+
+                const userMessage = {
+                    id: Date.now(),
+                    role: 'user',
+                    content: inputValue,
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInputValue('');
+                setLoading(true);
+
+                try {
+                    const response = await ApiService.chat(chatbot.id, inputValue);
+                    
+                    const aiMessage = {
+                        id: Date.now() + 1,
+                        role: 'ai',
+                        content: response.response,
+                        timestamp: new Date(),
+                        metadata: response.metadata
+                    };
+
+                    setMessages(prev => [...prev, aiMessage]);
+                } catch (error) {
+                    const errorMessage = {
+                        id: Date.now() + 1,
+                        role: 'ai',
+                        content: `I'm sorry, I'm having trouble connecting right now. Please try again in a moment. 🇬🇭\n\nIn the meantime, you can:\n• Review your course materials\n• Check with your classmates\n• Contact your lecturer for urgent help`,
+                        timestamp: new Date()
+                    };
+                    setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            };
+
+            return (
+                <div>
+                    <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                        <button className="btn btn-secondary" onClick={onBack}>
+                            <i className="fas fa-arrow-left"></i> Back to Dashboard
+                        </button>
+                    </div>
+
+                    <div className="chat-interface">
+                        <div className="chat-header">
+                            <div>
+                                <h3>{chatbot.name}</h3>
+                                <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>
+                                    {chatbot.subject || 'General Education'} • {user.collegeName}
+                                </p>
+                            </div>
+                            <div style={{ fontSize: '1.5rem' }}>
+                                {chatbot.is_default ? '🇬🇭' : '🤖'}
+                            </div>
+                        </div>
+
+                        <div className="chat-messages">
+                            {messages.map(message => (
+                                <div key={message.id} className={`message ${message.role}`}>
+                                    <div className="message-content">
+                                        {message.content.split('\n').map((line, index) => (
+                                            <div key={index}>
+                                                {line}
+                                                {index < message.content.split('\n').length - 1 && <br />}
+                                            </div>
+                                        ))}
+                                        {message.metadata && (
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.5rem' }}>
+                                                AI Provider: {message.metadata.ai_provider}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {loading && (
+                                <div className="message ai">
+                                    <div className="message-content">
+                                        <div className="loading">
+                                            <div className="spinner"></div>
+                                            AI is thinking...
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        <div className="chat-input-container">
+                            <input
+                                type="text"
+                                className="chat-input"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                placeholder="Ask your AI tutor anything about your studies..."
+                                disabled={loading}
+                            />
+                            <button
+                                className="send-btn"
+                                onClick={sendMessage}
+                                disabled={loading || !inputValue.trim()}
+                            >
+                                <i className="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Create Chatbot Component (Teachers only)
+        function CreateChatbot({ user, onSuccess, onViewChange }) {
+            const [formData, setFormData] = useState({
+                name: '',
+                description: '',
+                subject: '',
+                systemPrompt: `You are an AI teaching assistant for Ghana's B.Ed program. Help students with their studies, provide educational guidance, and support their learning journey in a culturally appropriate way for Ghana.
+
+Focus on:
+- Ghana's educational curriculum
+- Teacher training methodologies  
+- Classroom management strategies
+- Assessment techniques
+- Local educational context
+
+Be encouraging, supportive and provide practical examples relevant to Ghanaian schools.`,
+                accessCode: ''
+            });
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [success, setSuccess] = useState('');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+                setSuccess('');
+
+                try {
+                    const response = await ApiService.createChatbot(formData);
+                    setSuccess('AI Tutor created successfully! 🎉');
+                    setTimeout(() => {
+                        onSuccess();
+                        onViewChange('dashboard');
+                    }, 2000);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            if (user.role !== 'teacher') {
+                return (
+                    <div className="form-container">
+                        <div className="alert alert-error">
+                            <i className="fas fa-exclamation-triangle"></i>
+                            Only teachers can create AI tutors.
+                        </div>
+                        <button 
+                            className="btn btn-primary"
+                            onClick={() => onViewChange('dashboard')}
+                        >
+                            Back to Dashboard
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="form-container">
+                    <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#0066cc' }}>
+                        <i className="fas fa-robot"></i> Create AI Tutor
+                    </h2>
+
+                    {error && <div className="alert alert-error">{error}</div>}
+                    {success && <div className="alert alert-success">{success}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">Tutor Name</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
+                                placeholder="e.g., Mathematics Tutor for Year 2"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Description</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Brief description of what this tutor helps with"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Subject Area</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.subject}
+                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                required
+                                placeholder="e.g., Mathematics, English, Science"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">AI Instructions (System Prompt)</label>
+                            <textarea
+                                className="form-input"
+                                value={formData.systemPrompt}
+                                onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
+                                required
+                                rows="8"
+                                placeholder="Instructions for how the AI should behave and respond to students"
+                            />
+                            <small style={{ color: '#666' }}>
+                                This defines how your AI tutor will interact with students. Be specific about the subject, grade level, and teaching approach.
+                            </small>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Access Code (Optional)</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.accessCode}
+                                onChange={(e) => setFormData({ ...formData, accessCode: e.target.value })}
+                                placeholder="Leave blank for auto-generated code"
+                            />
+                            <small style={{ color: '#666' }}>
+                                Students will use this code to access your AI tutor. Leave blank to auto-generate.
+                            </small>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button 
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => onViewChange('dashboard')}
+                                style={{ flex: 1 }}
+                            >
+                                <i className="fas fa-arrow-left"></i> Cancel
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="btn btn-success"
+                                style={{ flex: 2 }}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <div className="loading">
+                                        <div className="spinner"></div>
+                                        Creating...
+                                    </div>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-plus"></i> Create AI Tutor
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        // Home Component (Landing Page)
+        function Home({ onViewChange }) {
+            const [systemHealth, setSystemHealth] = useState(null);
+
+            useEffect(() => {
+                checkSystemHealth();
+            }, []);
+
+            const checkSystemHealth = async () => {
+                try {
+                    const health = await ApiService.getHealth();
+                    setSystemHealth(health);
+                } catch (error) {
+                    console.error('Health check failed:', error);
+                }
+            };
+
+            return (
+                <div>
+                    <div className="welcome-section">
+                        <h1 className="welcome-title">
+                            🇬🇭 Ghana Education Platform
+                        </h1>
+                        <p className="welcome-subtitle">
+                            21st Century AI-Powered Teacher Education for Ghana's 47 Colleges
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => onViewChange('register')}
+                                style={{ fontSize: '1.1rem', padding: '1rem 2rem' }}
+                            >
+                                <i className="fas fa-user-plus"></i> Get Started
+                            </button>
+                            <button 
+                                className="btn btn-secondary"
+                                onClick={() => onViewChange('login')}
+                                style={{ fontSize: '1.1rem', padding: '1rem 2rem' }}
+                            >
+                                <i className="fas fa-sign-in-alt"></i> Login
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="features-grid">
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-robot"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>AI-Powered Learning</h3>
+                            <p>
+                                Get personalized help from AI tutors trained on Ghana's B.Ed curriculum. 
+                                Available 24/7 to support your studies.
+                            </p>
+                        </div>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>Teacher Training Focus</h3>
+                            <p>
+                                Specifically designed for Ghana's teacher education programs across all 47 
+                                Colleges of Education.
+                            </p>
+                        </div>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-users"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>Collaborative Learning</h3>
+                            <p>
+                                Connect with fellow students and educators. Share resources and learn together 
+                                in a supportive environment.
+                            </p>
+                        </div>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>Mobile-First Design</h3>
+                            <p>
+                                Optimized for mobile devices and works well on slower internet connections 
+                                across Ghana.
+                            </p>
+                        </div>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-book-open"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>Course Materials</h3>
+                            <p>
+                                Access lecture notes, practice questions, and study guides tailored to 
+                                your specific program and year.
+                            </p>
+                        </div>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <i className="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <h3 style={{ color: '#0066cc', marginBottom: '1rem' }}>Teaching Practice Support</h3>
+                            <p>
+                                Get guidance for Supported Teaching in Schools (STS) and help with 
+                                action research projects.
+                            </p>
+                        </div>
+                    </div>
+
+                    {systemHealth && (
+                        <div style={{ textAlign: 'center', color: 'white', marginTop: '2rem' }}>
+                            <div style={{ background: 'rgba(255, 255, 255, 0.1)', padding: '1.5rem', borderRadius: '10px', display: 'inline-block' }}>
+                                <h4 style={{ marginBottom: '1rem' }}>
+                                    <i className="fas fa-heartbeat"></i> System Status
+                                </h4>
+                                <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div>
+                                        <strong>{systemHealth.colleges}</strong> Colleges Supported
+                                    </div>
+                                    <div>
+                                        <strong>{systemHealth.ai_providers?.total_active || 0}</strong> AI Providers Active
+                                    </div>
+                                    <div style={{ color: '#28a745' }}>
+                                        <i className="fas fa-check-circle"></i> System Healthy
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [currentView, setCurrentView] = useState('home');
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                // Check for existing token
+                const token = localStorage.getItem('token');
+                if (token) {
+                    // Verify token with server (you might want to add this endpoint)
+                    // For now, we'll assume token is valid and redirect to dashboard
+                    setCurrentView('dashboard');
+                }
+                setLoading(false);
+            }, []);
+
+            const handleLogin = (userData) => {
+                setUser(userData);
+                setCurrentView('dashboard');
+            };
+
+            const handleRegister = (userData) => {
+                setUser(userData);
+                setCurrentView('dashboard');
+            };
+
+            const handleLogout = () => {
+                localStorage.removeItem('token');
+                setUser(null);
+                setCurrentView('home');
+            };
+
+            const handleViewChange = (view, data = null) => {
+                setCurrentView(view);
+            };
+
+            if (loading) {
+                return (
+                    <div className="app-container">
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            height: '100vh',
+                            color: 'white',
+                            fontSize: '1.2rem'
+                        }}>
+                            <div className="loading">
+                                <div className="spinner"></div>
+                                Loading Ghana Education Platform...
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app-container">
+                    <Header 
+                        user={user} 
+                        onLogout={handleLogout}
+                        currentView={currentView}
+                        onViewChange={handleViewChange}
+                    />
+                    
+                    <main className="main-content">
+                        {currentView === 'home' && (
+                            <Home onViewChange={handleViewChange} />
+                        )}
+                        
+                        {currentView === 'login' && (
+                            <Login onLogin={handleLogin} onViewChange={handleViewChange} />
+                        )}
+                        
+                        {currentView === 'register' && (
+                            <Register onRegister={handleRegister} onViewChange={handleViewChange} />
+                        )}
+                        
+                        {currentView === 'dashboard' && user && (
+                            <Dashboard user={user} onViewChange={handleViewChange} />
+                        )}
+                        
+                        {currentView === 'create-chatbot' && user && (
+                            <CreateChatbot 
+                                user={user} 
+                                onSuccess={() => {}} 
+                                onViewChange={handleViewChange} 
+                            />
+                        )}
+                    </main>
+
+                    <footer style={{ 
+                        textAlign: 'center', 
+                        padding: '2rem', 
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                        <p>
+                            🇬🇭 Ghana Education Platform • Supporting {GHANA_COLLEGES.length} Colleges of Education
+                        </p>
+                        <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                            Empowering the next generation of Ghanaian educators with AI technology
+                        </p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
