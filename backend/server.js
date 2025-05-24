@@ -108,11 +108,18 @@ Available Options:
 
 Please type the number (1-5) for what you need help with.`;
 
-// Middleware
+// Middleware with updated CORS for Netlify frontend
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001', 
+    'https://charming-churros-c86d3e.netlify.app', // Your Netlify frontend
+    process.env.FRONTEND_URL
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
